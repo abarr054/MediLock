@@ -6,92 +6,60 @@ import {
   Navigate,
 } from "react-router-dom";
 
-// ---- Pages ----
+// pages
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Forgot from "./pages/Forgot";
 import Upload from "./pages/Upload";
 import Share from "./pages/Share";
 import View from "./pages/View";
+import Logout from "./pages/Logout";
 
-// ---- Layout ----
+// layout
 import DashboardLayout from "./layout/DashboardLayout";
 
-// ---- Styles ----
+// styles
 import "./index.css";
 
-/* ---------- Auth wrapper ---------- */
+/* ---------- Auth Guard ---------- */
 function RequireAuth({ children }: { children: JSX.Element }) {
   const token = localStorage.getItem("token");
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!token) return <Navigate to="/login" replace />;
   return children;
 }
 
-/* ---------- App routes ---------- */
+/* ---------- Routes ---------- */
 const router = createBrowserRouter([
+  // Public routes
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
+  { path: "/forgot", element: <Forgot /> },
+
+  // LOGOUT ROUTE (fix)
+  { path: "/logout", element: <Logout /> },
+
+  // Protected dashboard routes
   {
     path: "/",
     element: (
       <RequireAuth>
-        <DashboardLayout>
-          <View />
-        </DashboardLayout>
+        <DashboardLayout />
       </RequireAuth>
     ),
+    children: [
+      { index: true, element: <View /> },
+      { path: "view", element: <View /> },
+      { path: "upload", element: <Upload /> },
+      { path: "share", element: <Share /> },
+    ],
   },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/register",
-    element: <Register />,
-  },
-  {
-    path: "/forgot",
-    element: <Forgot />,
-  },
-  {
-    path: "/upload",
-    element: (
-      <RequireAuth>
-        <DashboardLayout>
-          <Upload />
-        </DashboardLayout>
-      </RequireAuth>
-    ),
-  },
-  {
-    path: "/share",
-    element: (
-      <RequireAuth>
-        <DashboardLayout>
-          <Share />
-        </DashboardLayout>
-      </RequireAuth>
-    ),
-  },
-  {
-    path: "/view",
-    element: (
-      <RequireAuth>
-        <DashboardLayout>
-          <View />
-        </DashboardLayout>
-      </RequireAuth>
-    ),
-  },
-  // fallback
-  {
-    path: "*",
-    element: <Navigate to="/" replace />,
-  },
+
+  // Fallback
+  { path: "*", element: <Navigate to="/" replace /> },
 ]);
 
 /* ---------- Render ---------- */
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <RouterProvider router={router} />
   </React.StrictMode>
